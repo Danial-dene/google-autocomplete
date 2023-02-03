@@ -4,6 +4,7 @@ import { Select } from "antd";
 import _ from "lodash";
 import React, { useEffect, useState } from "react";
 import usePlacesAutocomplete, { getDetails } from "use-places-autocomplete";
+import { store } from "./redux/store";
 
 interface GooglePlaceProps {
   style?: React.CSSProperties;
@@ -126,13 +127,13 @@ const GoogleGetPlace: React.FC<GooglePlaceProps> = (props) => {
   };
 
   if (placeId && placeId === props.placeId && props.suggestion) {
-    const found = _.find(suggestions, (s) => s.place_id === placeId);
+    const found = _.find(suggestions, (s: any) => s.place_id === placeId);
     if (!found) suggestions.unshift(props.suggestion);
   }
 
   return (
     <Select
-      suffixIcon={<Icon name="chevron-down" />}
+      // suffixIcon={<Icon name="chevron-down" />}
       style={style}
       className={className}
       placeholder={placeholder}
@@ -154,19 +155,30 @@ const GoogleGetPlace: React.FC<GooglePlaceProps> = (props) => {
       //   )
       // }
       onChange={(value) => {
+        console.log("value", value);
         if (!value) {
           setPlaceId(undefined);
           setSuggestion(undefined);
         } else {
-          const suggestion = _.find(suggestions, (s) => s.place_id === value);
+          const suggestion = _.find(
+            suggestions,
+            (s: any) => s.place_id === value
+          );
           if (suggestions) {
             setPlaceId(value);
             setSuggestion(suggestion);
+            console.log("suggestion", suggestion?.description);
+            // const currentState = store.getState();
+            // console.log("currentState", currentState);
+            store.dispatch({
+              type: "ADD_SEARCH_RESULT",
+              payload: suggestion?.description,
+            });
           }
         }
       }}
     >
-      {_.map(suggestions, (suggestion) => {
+      {_.map(suggestions, (suggestion: any) => {
         const mainText = _.get(suggestion, "structured_formatting.main_text");
         const subText = _.get(
           suggestion,
